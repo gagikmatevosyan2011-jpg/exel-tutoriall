@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="hy" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Ուսուցման Ինտերակտիվ Ուղեցույց | MS Excel Tutorial Armenian</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        excel: {
+                            50: '#f2f9f5',
+                            100: '#e1f3e8',
+                            500: '#107c41',
+                            600: '#0e6b37',
+                            700: '#0b532b',
+                            800: '#094223',
+                            900: '#07331b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts & Lucide Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .cell-input:focus { outline: 2px solid #107c41; z-index: 10; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16, 124, 65, 0.3); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(16, 124, 65, 0.6); }
+    </style>
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
+
+    <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 sm:px-6 z-20 shrink-0">
+        <div class="flex items-center space-x-3 gap-2">
+            <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <div class="flex items-center space-x-2 gap-2">
+                <div class="w-10 h-10 bg-excel-500 rounded-xl flex items-center justify-center text-white shadow-md font-bold text-xl tracking-wider">
+                    XLS
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-900 dark:text-white flex items-center gap-2">
+                        Excel Դասընթաց <span class="bg-excel-100 text-excel-800 text-xs px-2 py-0.5 rounded-full font-semibold border border-excel-500/20">Հայերեն</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Սկսնակից մինչև Պրոֆեսիոնալ</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Progress & Actions -->
+        <div class="flex items-center space-x-4 gap-3">
+            <div class="hidden md:flex items-center space-x-3 gap-2 bg-slate-100 dark:bg-slate-700/50 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600">
+                <i data-lucide="award" class="w-5 h-5 text-excel-500"></i>
+                <div class="text-xs">
+                    <div class="flex justify-between font-medium text-slate-600 dark:text-slate-300 gap-4">
+                        <span>Ընդհանուր առաջընթաց</span>
+                        <span id="overall-progress-text">0%</span>
+                    </div>
+                    <div class="w-32 bg-slate-200 dark:bg-slate-600 h-1.5 rounded-full mt-1 overflow-hidden">
+                        <div id="overall-progress-bar" class="bg-excel-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition">
+                <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+                <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-amber-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-80 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 z-30 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out flex flex-col h-full shadow-lg lg:shadow-none">
+            
+            <!-- Sidebar Search -->
+            <div class="p-4 border-b border-slate-200 dark:border-slate-700">
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="module-search" placeholder="Որոնել թեմաները..." class="w-full pl-9 pr-3 py-2 text-sm bg-slate-100 dark:bg-slate-700/60 rounded-lg border border-transparent focus:border-excel-500 focus:bg-white dark:focus:bg-slate-800 transition outline-none text-slate-800 dark:text-slate-100">
+                </div>
+            </div>
+
+            <!-- Navigation Tree -->
+            <div id="modules-list" class="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
+                <!-- Modules will be populated by JavaScript -->
+            </div>
+
+            <!-- Bottom Stats Widget -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
+                <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                    <span class="flex items-center gap-1"><i data-lucide="book-open" class="w-4 h-4 text-excel-500"></i> 6 Մոդուլ</span>
+                    <span class="flex items-center gap-1"><i data-lucide="grid" class="w-4 h-4 text-excel-500"></i> Sandbox</span>
+                    <span class="flex items-center gap-1"><i data-lucide="check-circle" class="w-4 h-4 text-excel-500"></i> Թեստեր</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay for Mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-20 hidden lg:hidden"></div>
+
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar" id="main-content">
+            <div class="max-w-4xl mx-auto space-y-6">
+                <!-- Dynamic Content Container -->
+                <div id="lesson-content-container">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const courseData = [
+            {
+                id: 'mod1',
+                title: 'Մոդուլ 1. Առաջին քայլեր (Excel-ի հիմունքները)',
+                description: 'Ծանոթություն աշխատանքային տիրույթին, տողերին, սյուներին և ինտերֆեյսին:',
+                lessons: [
+                    {
+                        id: 'm1_1',
+                        title: '1.1 Ի՞նչ է Excel-ը և աշխատանքային տիրույթը',
+                        content: `
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">1.1 Ի՞նչ է Excel-ը և աշխատանքային տիրույթը</h2>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                Microsoft Excel-ը աշխարհում ամենատարածված աղյուսակային ծրագիրն է: Այն օգտագործվում է տվյալների հաշվարկման, վերլուծության, պահպանման և վիզուալիզացիայի (գրաֆիկներ, դիագրամներ) համար:
+                            </p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+                                <div class="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                                    <h4 class="font-bold text-emerald-800 dark:text-emerald-300 text-base mb-1">Սյուներ (Columns)</h4>
+                                    <p class="text-xs text-emerald-700 dark:text-emerald-400">Ուղղահայաց գծեր են, որոնք նշանակվում են լատինական տառերով (A, B, C...):</p>
+                                </div>
+                                <div class="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
+                                    <h4 class="font-bold text-blue-800 dark:text-blue-300 text-base mb-1">Տողեր (Rows)</h4>
+                                    <p class="text-xs text-blue-700 dark:text-blue-400">Հորիզոնական գծեր են, որոնք նշանակվում են թվերով (1, 2, 3...):</p>
+                                </div>
+                                <div class="bg-purple-50 dark:bg-purple-950/40 p-4 rounded-xl border border-purple-200 dark:border-purple-800">
+                                    <h4 class="font-bold text-purple-800 dark:text-purple-300 text-base mb-1">Բջիջներ (Cells)</h4>
+                                    <p class="text-xs text-purple-700 dark:text-purple-400">Սյան և տողի հատման կետն է, օրինակ՝ <strong>A1</strong>, <strong>B5</strong>:</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded-r-lg mb-6">
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="lightbulb" class="w-6 h-6 text-amber-600 shrink-0 mt-0.5"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-amber-900 dark:text-amber-200">Կարևոր է իմանալ</h4>
+                                        <p class="text-sm text-amber-800 dark:text-amber-300 mt-1">
+                                            Յուրաքանչյուր բջիջ ունի իր եզակի հասցեն (Address): Օրինակ՝ երբ դուք գտնվում եք B սյան և 4-րդ տողի հատման վրա, այդ բջջի հասցեն է <strong>B4</strong>:
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-100 dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
+                                <h3 class="font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
+                                    <i data-lucide="check-square" class="w-5 h-5 text-excel-500"></i> Ստուգիր ինքդ քեզ
+                                </h3>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">Ի՞նչպես է կոչվում C սյան և 10-րդ տողի հատման բջիջը.</p>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="checkAnswer(this, 'C10', 'C10')" class="px-4 py-2 bg-white dark:bg-slate-700 rounded-lg text-sm border hover:border-excel-500 transition">10C</button>
+                                    <button onclick="checkAnswer(this, 'C10', 'C10')" class="px-4 py-2 bg-white dark:bg-slate-700 rounded-lg text-sm border hover:border-excel-500 transition">C10</button>
+                                    <button onclick="checkAnswer(this, 'C10', 'C10')" class="px-4 py-2 bg-white dark:bg-slate-700 rounded-lg text-sm border hover:border-excel-500 transition">C-10</button>
+                                </div>
+                                <div class="quiz-feedback mt-2 text-sm hidden font-medium"></div>
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'm1_2',
+                        title: '1.2 Ինտերֆեյսի ծանոթություն (Ribbon, Formula Bar)',
+                        content: `
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">1.2 Ինտերֆեյսի ծանոթություն</h2>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                Excel-ի ինտերֆեյսը կազմված է մի քանի հիմնական գոտիներից, որոնք ապահովում են արագ մուտք դեպի գործիքները:
+                            </p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="p-4 border rounded-xl dark:border-slate-700 bg-white dark:bg-slate-800">
+                                    <h3 class="font-bold text-excel-600 dark:text-excel-400 flex items-center gap-2">
+                                        <i data-lucide="layout" class="w-5 h-5"></i> 1. Ribbon Մենյու (Ժապավեն)
+                                    </h3>
+                                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">
+                                        Վերևի հիմնական վահանակն է, որտեղ գտնվում են ներդիրները (Home, Insert, Page Layout, Formulas, Data, Review, View):
+                                    </p>
+                                </div>
+
+                                <div class="p-4 border rounded-xl dark:border-slate-700 bg-white dark:bg-slate-800">
+                                    <h3 class="font-bold text-excel-600 dark:text-excel-400 flex items-center gap-2">
+                                        <i data-lucide="code" class="w-5 h-5"></i> 2. Formula Bar (Բանաձևերի տող)
+                                    </h3>
+                                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">
+                                        Գտնվում է Ribbon-ի անմիջապես ներքևում (<code>fx</code> նշանի կողքին): Այստեղ տեսնում եք ընտրված բջջի իրական բովանդակությունը կամ բանաձևը:
+                                    </p>
+                                </div>
+
+                                <div class="p-4 border rounded-xl dark:border-slate-700 bg-white dark:bg-slate-800">
+                                    <h3 class="font-bold text-excel-600 dark:text-excel-400 flex items-center gap-2">
+                                        <i data-lucide="info" class="w-5 h-5"></i> 3. Status Bar (Վիճակի տող)
+                                    </h3>
+                                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">
+                                        Գտնվում է էկրանի ամենաներքևում: Այստեղ երևում են ընտրված բջիջների գումարը, միջին արժեքը, քանակը, ինչպես նաև մասշտաբավորման (Zoom) սլայդերը:
+                                    </p>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'm1_3',
+                        title: '1.3 Տվյալների ներմուծում և ֆորմատավորում',
+                        content: `
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">1.3 Տվյալների ներմուծում և ֆորմատավորում</h2>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                Excel-ում բջիջը կարող է պարունակել տարբեր տիպի տվյալներ՝ Տեքստ, Թիվ, Ամսաթիվ, Տոկոս կամ Արտույթ (Currency):
+                            </p>
+
+                            <div class="overflow-x-auto mb-6 border rounded-xl dark:border-slate-700">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                                        <tr>
+                                            <th class="p-3">Ձևաչափ (Format)</th>
+                                            <th class="p-3">Օրինակ</th>
+                                            <th class="p-3">Նկարագրություն</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                                        <tr>
+                                            <td class="p-3 font-semibold text-excel-600">General</td>
+                                            <td class="p-3">Անուն 123</td>
+                                            <td class="p-3">Ստանդարտ ձևաչափ առանց հստակ կանոնների:</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-3 font-semibold text-excel-600">Number</td>
+                                            <td class="p-3">1,250.00</td>
+                                            <td class="p-3">Թվային ձևաչափ, կարելի է նշել տասնորդական նիշերի քանակը:</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-3 font-semibold text-excel-600">Currency / Accounting</td>
+                                            <td class="p-3">5,000 ֏ / $5,000</td>
+                                            <td class="p-3">Դրամական արժեքներ՝ արժույթի նշանով:</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-3 font-semibold text-excel-600">Short Date</td>
+                                            <td class="p-3">15.10.2026</td>
+                                            <td class="p-3">Օր/Ամիս/Տարի ֆորմատով ամսաթիվ:</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        `
+                    }
+                ]
+            },
+            {
+                id: 'mod2',
+                title: 'Մոդուլ 2. Հիմնական գործիքներ և ֆորմատավորում',
+                description: 'Աղյուսակի ձևավորում, տվյալների սորտավորում, ֆիլտրացիա և conditional formatting:',
+                lessons: [
+                    {
+                        id: 'm2_1',
+                        title: '2.1 Սորտավորում և Ֆիլտրացիա (Sort & Filter)',
+                        content: `
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">2.1 Sort & Filter (Սորտավորում և Ֆիլտրացիա)</h2>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                Մեծ աղյուսակների հետ աշխատելիս անհրաժեշտ է լինում տվյալները դասավորել կամ ցույց տալ միայն որոշակի պայմանին համապատասխանող տողերը:
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="p-4 bg-white dark:bg-slate-800 border rounded-xl dark:border-slate-700">
+                                    <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-2">
+                                        <i data-lucide="arrow-down-up" class="w-5 h-5 text-excel-500"></i> Sort (Սորտավորում)
+                                    </h3>
+                                    <ul class="text-sm text-slate-600 dark:text-slate-300 space-y-1 list-disc pl-5">
+                                        <li><strong>A to Z:</strong> Այբբենական կարգով կամ փոքրից մեծ</li>
+                                        <li><strong>Z to A:</strong> Հակառակ այբբենական կամ մեծից փոքր</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 bg-white dark:bg-slate-800 border rounded-xl dark:border-slate-700">
+                                    <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-2">
+                                        <i data-lucide="filter" class="w-5 h-5 text-excel-500"></i> Filter (Ֆիլտր)
+                                    </h3>
+                                    <p class="text-sm text-slate-600 dark:text-slate-300">
+                                        Ակտիվացնելու համար՝ ընտրեք աղյուսակի վերնագիրը և սեղմեք <strong>Ctrl + Shift + L</strong>:
+                                    </p>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'm2_2',
+                        title: '2.2 Պայմանական Ֆորմատավորում (Conditional Formatting)',
+                        content: `
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">2.2 Պայմանական Ֆորմատավորում</h2>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                Conditional Formatting-ը թույլ է տալիս ավտոմատ կերպով փոխել բջիջների գույնը կամ ոճը՝ ելնելով դրանց արժեքից:
+                            </p>
+
+                            <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3 mb-6">
+                                <h4 class="font-bold text-slate-800 dark:text-white">Հաճախ օգտագործվող կանոններ.</h4>
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">Highlight Cell Rules</span>
+                                    <span class="text-sm text-slate-600 dark:text-slate-300">Գունավորում է բջիջը, եթե արժեքը > 100, < 50 կամ հավասար է տեքստի:</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">Color Scales</span>
+                                    <span class="text-sm text-slate-600 dark:text-slate-300">Ստեղծում է ջերմային քարտեզ ( Heatmap )՝ մեծ և փոքր թվերը տարբերակելու համար:</span>
+                                </div>
+                            </div>
+                        `
+                    }
+                ]
+            },
+            {
+                id: 'mod3',
+                title: 'Մոդուլ 3. Հիմնական բանաձևեր (Formulas & Functions)',
+                description: 'SUM, AVERAGE, COUNT, MIN, MAX և հղումների տեսակները ($A$1):',
+                lessons: [
+                    {
+                        id: 'm3_1',
+                        title: '3.1 Մաթեմատիկական հիմունքներ և SUM, AVERAGE',
+                        content: `
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">3.1 Հիմնական բանաձևեր</h2>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                Excel-ում ցանկացած բանաձև <strong>ՄԻՇՏ</strong> սկսվում է հավասարման <code>=</code> նշանով:
+                            </p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-sm relative group">
+                                    <div class="text-emerald-400 font-bold mb-1">// Գումարի հաշվարկ (SUM)</div>
+                                    <code>=SUM(A1:A10)</code>
+                                    <p class="text-xs text-slate-400 mt-2 font-sans">Գումարում է A1-ից A10 բոլոր բջիջների արժեքները:</p>
+                                </div>
+
+                                <div class="p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-sm relative group">
+                                    <div class="text-emerald-400 font-bold mb-1">// Միջին թվաբանական (AVERAGE)</div>
+                                    <code>=AVERAGE(B1:B5)</code>
+                                    <p class="text-xs text-slate-400 mt-2 font-sans">Հաշվում է B1-ից B5 բջիջների միջին արժեքը:</p>
+                                </div>
+
+                                <div class="p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-sm relative group">
+                                    <div class="text-emerald-400 font-bold mb-1">// Քանակի հաշվարկ (COUNT & COUNTA)</div>
+                                    <code>=COUNT(A1:A10)</code>
+                                    <p class="text-xs text-slate-400 mt-2 font-sans">COUNT-ը հաշվում է միայն <strong>թվային</strong> բջիջները, իսկ COUNTA-ն՝ բոլոր ոչ դատարկ բջիջները:</p>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'm3_2',
+                        title: '3.2 Հարաբերական և Բացարձակ հղումներ ($ նշանը)',
+                        content: `
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">3.2 Հարաբերական և Բացարձակ հղումներ ($A$1)</h2>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                Երբ բանաձևը պատճենում եք մեկ այլ բջջի մեջ, հղումները կարող են փոխվել կամ սառեցվել:
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="p-4 border dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
+                                    <h4 class="font-bold text-slate-800 dark:text-white mb-2">Հարաբերական հղում (A1)</h4>
+                                    <p class="text-xs text-slate-600 dark:text-slate-300">
+                                        Բանաձևը ներքև տանելիս A1-ը ավտոմատ դառնում է A2, A3...
+                                    </p>
+                                </div>
+                                <div class="p-4 border dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
+                                    <h4 class="font-bold text-excel-600 dark:text-excel-400 mb-2">Բացարձակ հղում ($A$1)</h4>
+                                    <p class="text-xs text-slate-600 dark:text-slate-300">
+                                        <code>$</code> նշանը «սառեցնում» է սյունը կամ տողը: Բանաձևը տեղափոխելիս այն չի փոխվում:
+                                    </p>
+                                    <p class="text-xs text-slate-400 mt-2">Հուշում. Սեղմեք <strong>F4</strong> ստեղնը $ նշանն ավտոմատ ավելացնելու համար:</p>
+                                </div>
+                            </div>
+                        `
+                    }
+                ]
+            },
+            {
+                id: 'mod4',
+                title: 'Մոդուլ 4. Տրամաբանական և որոնման ֆունկցիաներ',
+                description: 'IF, SUMIF, COUNTIF, VLOOKUP և ժամանակակից XLOOKUP:',
+                lessons: [
+                    {
+                        id: 'm4_1',
+                        title: '4.1 IF, SUMIF, COUNTIF ֆունկցիաներ',
+                        content: `
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">4.1 Տրամաբանական ֆունկցիաներ</h2>
+                            
+                            <div class="space-y-4 mb-6">
+                                <div class="p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-sm">
+                                    <div class="text-amber-400 font-bold mb-1">IF ֆունկցիա (Եթե)</div>
+                                    <code>=IF(A1 >= 50, "Ընդունված", "Կտրված")</code>
+                                    <p class="text-xs text-slate-400 mt-2 font-sans">Եթե A1-ը մեծ կամ հավասար է 50-ի, տպում է "Ընդունված", հակառակ դեպքում՝ "Կտրված":</p>
+                                </div>
+
+                                <div class="p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-sm">
+                                    <div class="text-amber-400 font-bold mb-1">SUMIF (Գումար պայմանով)</div>
+                                    <code>=SUMIF(A1:A10, ">1000", B1:B10)</code>
+                                    <p class="text-xs text-slate-400 mt-2 font-sans">Գումարում է B1:B10 բջիջները միայն այն տողերի համար, որտեղ A1:A10-ը մեծ է 1000-ից:</p>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        id: 'm4_2',
+                        title: '4.2 VLOOKUP և XLOOKUP',
+                        content: `
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">4.2 Տվյալների որոնում VLOOKUP & XLOOKUP</h2>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                Այս ֆունկցիաները փնտրում են արժեքը մեկ աղյուսակում և վերադարձնում համապատասխան տվյալը մեկ այլ սյունից:
+                            </p>
+
+                            <div class="p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-sm mb-6">
+                                <div class="text-emerald-400 font-bold mb-1">VLOOKUP սինտաքս</div>
+                                <code>=VLOOKUP(որոնվող_արժեք, աղյուսակի_տիրույթ, սյան_համար, FALSE)</code>
+                                <div class="mt-3 text-xs text-slate-300 font-sans leading-relaxed">
+                                    Օրինակ՝ <code>=VLOOKUP("Արմեն", A1:C10, 3, FALSE)</code> - Գտնում է «Արմեն» անունը A1:C10 աղյուսակում և վերադարձնում 3-րդ սյան արժեքը:
+                                </div>
+                            </div>
+                        `
+                    }
+                ]
+            },
+            {
+                id: 'mod5',
+                title: 'Մոդուլ 5. Վիզուալիզացիա և Pivot Tables',
+                description: 'Գրաֆիկների/Դիագրամների ստեղծում և Pivot Tables (Ամփոփ աղյուսակներ):',
+                lessons: [
+                    {
+                        id: 'm5_1',
+                        title: '5.1 Դիագրամներ (Charts) և Pivot Tables',
+                        content: `
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">5.1 Վիզուալիզացիա և Pivot Tables</h2>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                Տվյալները հասկանալի ներկայացնելու համար օգտագործվում են դիագրամներ և ամփոփ աղյուսակներ:
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="p-4 border dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
+                                    <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-2">
+                                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-excel-500"></i> Charts (Դիագրամներ)
+                                    </h3>
+                                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">
+                                        Column Chart, Bar Chart, Pie Chart (կլոր դիագրամ):
+                                    </p>
+                                    <p class="text-xs text-slate-400">Insert -> Charts բաժնից:</p>
+                                </div>
+
+                                <div class="p-4 border dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
+                                    <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-2">
+                                        <i data-lucide="table" class="w-5 h-5 text-excel-500"></i> Pivot Tables
+                                    </h3>
+                                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">
+                                        Թույլ է տալիս վայրկյանների ընթացքում խմբավորել հազարավոր տողեր ըստ կատեգորիաների՝ առանց բանաձև գրելու:
+                                    </p>
+                                </div>
+                            </div>
+                        `
+                    }
+                ]
+            },
+            {
+                id: 'mod6',
+                title: '6. Ինտերակտիվ Սիմուլյատոր (Excel Sandbox)',
+                description: 'Փորձարկիր Excel բանաձևերը իրական ժամանակում ինտերակտիվ աղյուսակում:',
+                lessons: [
+                    {
+                        id: 'm6_sandbox',
+                        title: '6.1 Ինտերակտիվ Excel Սիմուլյատոր',
+                        isSandbox: true
+                    }
+                ]
+            },
+            {
+                id: 'mod7',
+                title: '7. Գիտելիքների Թեստ (Interactive Quiz)',
+                description: 'Ստուգիր ձեռք բերած գիտելիքները ինտերակտիվ թեստի միջոցով:',
+                lessons: [
+                    {
+                        id: 'm7_quiz',
+                        title: '7.1 Ամփոփիչ Թեստ',
+                        isQuiz: true
+                    }
+                ]
+            }
+        ];
+
+        let state = {
+            currentLessonId: 'm1_1',
+            completedLessons: new Set(JSON.parse(localStorage.getItem('excel_completed_lessons') || '[]')),
+            gridData: {
+                'A1': 'Ապրանք', 'B1': 'Քանակ', 'C1': 'Գին', 'D1': 'Ընդամենը',
+                'A2': 'Խնձոր', 'B2': '10', 'C2': '400', 'D2': '=B2*C2',
+                'A3': 'Տանձ', 'B3': '5', 'C3': '600', 'D3': '=B3*C3',
+                'A4': 'Բանան', 'B4': '12', 'C4': '800', 'D4': '=B4*C4',
+                'A5': 'Ընդամենը', 'B5': '=SUM(B2:B4)', 'C5': '-', 'D5': '=SUM(D2:D4)'
+            }
+        };
+
+        const quizQuestions = [
+            {
+                question: '1. Ի՞նչ նշանով է ՄԻՇՏ սկսվում Excel-ի բանաձևը.',
+                options: ['+', '=', 'fx', 'SUM'],
+                correct: 1
+            },
+            {
+                question: '2. Ո՞ր ֆունկցիան է հաշվում բջիջների գումարը.',
+                options: ['COUNT', 'AVERAGE', 'SUM', 'TOTAL'],
+                correct: 2
+            },
+            {
+                question: '3. Ի՞նչ է անում $ նշանը բանաձևում (օրինակ՝ $A$1).',
+                options: ['Փոխում է դրամական արժույթը', 'Սառեցնում է բջջի հղումը', 'Ջնջում է բջջի բովանդակությունը', 'Սորտավորում է տվյալները'],
+                correct: 1
+            },
+            {
+                question: '4. Ո՞ր ստեղնաշարային կոմբինացիայով է ակտիվանում AutoFilter-ը.',
+                options: ['Ctrl + C', 'Ctrl + Shift + L', 'Alt + F4', 'Ctrl + Z'],
+                correct: 1
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLucide();
+            renderSidebar();
+            loadLesson(state.currentLessonId);
+            updateProgressBar();
+
+            // Mobile menu listeners
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            mobileBtn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            }
+
+            // Theme toggle
+            const themeBtn = document.getElementById('theme-toggle');
+            themeBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+            });
+
+            // Search filter
+            document.getElementById('module-search').addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                renderSidebar(query);
+            });
+        });
+
+        function initLucide() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        function renderSidebar(filter = '') {
+            const container = document.getElementById('modules-list');
+            container.innerHTML = '';
+
+            courseData.forEach((mod) => {
+                const filteredLessons = mod.lessons.filter(l => l.title.toLowerCase().includes(filter));
+                if (filter && filteredLessons.length === 0) return;
+
+                const modEl = document.createElement('div');
+                modEl.className = 'space-y-1 mb-3';
+
+                const modTitle = document.createElement('div');
+                modTitle.className = 'text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 py-1 flex justify-between items-center';
+                modTitle.innerText = mod.title;
+
+                modEl.appendChild(modTitle);
+
+                const lessonsList = filteredLessons.length > 0 ? filteredLessons : mod.lessons;
+
+                lessonsList.forEach((lesson) => {
+                    const isDone = state.completedLessons.has(lesson.id);
+                    const isActive = state.currentLessonId === lesson.id;
+
+                    const btn = document.createElement('button');
+                    btn.onclick = () => {
+                        loadLesson(lesson.id);
+                        if (window.innerWidth < 1024) {
+                            document.getElementById('sidebar').classList.add('-translate-x-full');
+                            document.getElementById('sidebar-overlay').classList.add('hidden');
+                        }
+                    };
+                    btn.className = `w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition flex items-center justify-between gap-2 ${
+                        isActive 
+                            ? 'bg-excel-500 text-white shadow-md shadow-excel-500/20' 
+                            : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-200'
+                    }`;
+
+                    btn.innerHTML = `
+                        <span class="truncate">${lesson.title}</span>
+                        ${isDone ? `<i data-lucide="check-circle-2" class="w-4 h-4 ${isActive ? 'text-white' : 'text-excel-500'} shrink-0"></i>` : ''}
+                    `;
+                    modEl.appendChild(btn);
+                });
+
+                container.appendChild(modEl);
+            });
+
+            initLucide();
+        }
+
+        function loadLesson(lessonId) {
+            state.currentLessonId = lessonId;
+            renderSidebar(document.getElementById('module-search').value);
+
+            const container = document.getElementById('lesson-content-container');
+            let foundLesson = null;
+
+            for (const m of courseData) {
+                const l = m.lessons.find(x => x.id === lessonId);
+                if (l) { foundLesson = l; break; }
+            }
+
+            if (!foundLesson) return;
+
+            if (foundLesson.isSandbox) {
+                renderSandboxView(container);
+            } else if (foundLesson.isQuiz) {
+                renderQuizView(container);
+            } else {
+                renderStandardLessonView(container, foundLesson);
+            }
+
+            initLucide();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderStandardLessonView(container, lesson) {
+            const isCompleted = state.completedLessons.has(lesson.id);
+
+            container.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
+                    ${lesson.content}
+
+                    <div class="pt-6 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                        <button onclick="toggleLessonComplete('${lesson.id}')" class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition ${
+                            isCompleted 
+                                ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300' 
+                                : 'bg-excel-500 hover:bg-excel-600 text-white shadow-md shadow-excel-500/20'
+                        }">
+                            <i data-lucide="${isCompleted ? 'check-check' : 'check'}" class="w-4 h-4"></i>
+                            ${isCompleted ? 'Ավարտված է' : 'Նշել որպես ավարտված'}
+                        </button>
+
+                        <button onclick="navigateNext('${lesson.id}')" class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl transition">
+                            Հաջորդը <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSandboxView(container) {
+            container.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i data-lucide="grid" class="w-6 h-6 text-excel-500"></i> Excel Ինտերակտիվ Սիմուլյատոր
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                Փոփոխեք թվերը, գրեք բանաձևեր (օրինակ՝ <code>=SUM(B2:B4)</code> կամ <code>=B2*C2</code>) և տեսեք արդյունքը:
+                            </p>
+                        </div>
+                        <button onclick="resetGridData()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 transition flex items-center gap-1">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Վերականգնել
+                        </button>
+                    </div>
+
+                    <!-- Active Formula Bar -->
+                    <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <span id="active-cell-id" class="font-mono font-bold text-excel-600 dark:text-excel-400 text-sm w-12 text-center bg-white dark:bg-slate-800 py-1 rounded border dark:border-slate-700">A1</span>
+                        <span class="font-serif italic font-bold text-slate-400">fx</span>
+                        <input type="text" id="formula-bar-input" class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-1 text-sm font-mono focus:outline-none focus:border-excel-500 text-slate-800 dark:text-slate-100" placeholder="Մուտքագրեք արժեք կամ բանաձև...">
+                    </div>
+
+                    <!-- Excel Table Grid -->
+                    <div class="overflow-x-auto border border-slate-300 dark:border-slate-700 rounded-xl shadow-inner">
+                        <table class="w-full border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-100 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 font-mono text-xs text-center border-b border-slate-300 dark:border-slate-700">
+                                    <th class="w-10 p-2 border-r border-slate-300 dark:border-slate-700 bg-slate-200/60 dark:bg-slate-800"></th>
+                                    <th class="w-1/4 p-2 border-r border-slate-300 dark:border-slate-700">A</th>
+                                    <th class="w-1/4 p-2 border-r border-slate-300 dark:border-slate-700">B</th>
+                                    <th class="w-1/4 p-2 border-r border-slate-300 dark:border-slate-700">C</th>
+                                    <th class="w-1/4 p-2">D</th>
+                                </tr>
+                            </thead>
+                            <tbody id="excel-grid-body" class="font-sans">
+                                <!-- Generated JS Grid -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Helpful Formula Hints -->
+                    <div class="p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800/50 text-xs space-y-2 text-emerald-800 dark:text-emerald-300">
+                        <div class="font-bold flex items-center gap-1"><i data-lucide="sparkles" class="w-4 h-4"></i> Փորձարկիր հետևյալ բանաձևերը.</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono">
+                            <div>• <code>=SUM(B2:B4)</code> - Գումարել B2-ից B4</div>
+                            <div>• <code>=AVERAGE(C2:C4)</code> - Գնի միջինը</div>
+                            <div>• <code>=B2*C2</code> - Բազմապատկել քանակը գնով</div>
+                            <div>• <code>=MAX(D2:D4)</code> - Առավելագույն գումարը</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            renderGridCells();
+        }
+
+        function renderGridCells() {
+            const tbody = document.getElementById('excel-grid-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            const cols = ['A', 'B', 'C', 'D'];
+            const rows = [1, 2, 3, 4, 5];
+
+            rows.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-slate-200 dark:border-slate-700/60';
+
+                // Row Header Number
+                const th = document.createElement('td');
+                th.className = 'bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 font-mono text-xs text-center border-r border-slate-200 dark:border-slate-700 p-2 font-semibold select-none';
+                th.innerText = r;
+                tr.appendChild(th);
+
+                cols.forEach(c => {
+                    const cellId = `${c}${r}`;
+                    const rawVal = state.gridData[cellId] || '';
+                    const displayVal = evaluateFormula(rawVal);
+
+                    const td = document.createElement('td');
+                    td.className = 'border-r border-slate-200 dark:border-slate-700 p-0 relative hover:bg-slate-50 dark:hover:bg-slate-700/30';
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = displayVal;
+                    input.dataset.cellId = cellId;
+                    input.className = `w-full h-full px-3 py-2 text-sm bg-transparent border-none cell-input text-slate-800 dark:text-slate-100 ${r === 1 ? 'font-bold bg-slate-50/50 dark:bg-slate-800/50' : ''}`;
+
+                    input.addEventListener('focus', () => {
+                        document.getElementById('active-cell-id').innerText = cellId;
+                        const fInput = document.getElementById('formula-bar-input');
+                        fInput.value = state.gridData[cellId] || '';
+                        fInput.dataset.activeCell = cellId;
+                    });
+
+                    input.addEventListener('change', (e) => {
+                        updateCellValue(cellId, e.target.value);
+                    });
+
+                    td.appendChild(input);
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+
+            // Synchronize Formula Bar
+            const fInput = document.getElementById('formula-bar-input');
+            if (fInput) {
+                fInput.onchange = (e) => {
+                    const activeCell = fInput.dataset.activeCell || 'A1';
+                    updateCellValue(activeCell, e.target.value);
+                };
+            }
+        }
+
+        function updateCellValue(cellId, val) {
+            state.gridData[cellId] = val;
+            renderGridCells();
+        }
+
+        function resetGridData() {
+            state.gridData = {
+                'A1': 'Ապրանք', 'B1': 'Քանակ', 'C1': 'Գին', 'D1': 'Ընդամենը',
+                'A2': 'Խնձոր', 'B2': '10', 'C2': '400', 'D2': '=B2*C2',
+                'A3': 'Տանձ', 'B3': '5', 'C3': '600', 'D3': '=B3*C3',
+                'A4': 'Բանան', 'B4': '12', 'C4': '800', 'D4': '=B4*C4',
+                'A5': 'Ընդամենը', 'B5': '=SUM(B2:B4)', 'C5': '-', 'D5': '=SUM(D2:D4)'
+            };
+            renderGridCells();
+        }
+
+        /* Simple Formula Interpreter for Excel Sandbox */
+        function evaluateFormula(expr) {
+            if (!expr || typeof expr !== 'string') return expr;
+            if (!expr.startsWith('=')) return expr;
+
+            try {
+                let clean = expr.substring(1).trim().toUpperCase();
+
+                // Handle SUM range: SUM(B2:B4)
+                if (clean.startsWith('SUM(') && clean.endsWith(')')) {
+                    const range = clean.substring(4, clean.length - 1);
+                    const values = getRangeValues(range);
+                    return values.reduce((a, b) => a + b, 0);
+                }
+
+                // Handle AVERAGE range: AVERAGE(C2:C4)
+                if (clean.startsWith('AVERAGE(') && clean.endsWith(')')) {
+                    const range = clean.substring(8, clean.length - 1);
+                    const values = getRangeValues(range);
+                    return values.length ? (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1) : 0;
+                }
+
+                // Handle MAX range: MAX(D2:D4)
+                if (clean.startsWith('MAX(') && clean.endsWith(')')) {
+                    const range = clean.substring(4, clean.length - 1);
+                    const values = getRangeValues(range);
+                    return values.length ? Math.max(...values) : 0;
+                }
+
+                // Simple arithmetic like B2*C2 or A1+10
+                let replaced = clean.replace(/([A-D][1-5])/g, (match) => {
+                    let val = evaluateFormula(state.gridData[match] || '0');
+                    return isNaN(Number(val)) ? 0 : Number(val);
+                });
+
+                // Safe evaluation of simple math operators
+                if (/^[0-9\.\+\-\*\/\(\)\s]+$/.test(replaced)) {
+                    return eval(replaced);
+                }
+
+                return '#ERROR!';
+            } catch (err) {
+                return '#VALUE!';
+            }
+        }
+
+        function getRangeValues(rangeStr) {
+            const parts = rangeStr.split(':');
+            if (parts.length !== 2) return [];
+
+            const startCol = parts[0][0];
+            const startRow = parseInt(parts[0].substring(1));
+            const endCol = parts[1][0];
+            const endRow = parseInt(parts[1].substring(1));
+
+            let values = [];
+            const cols = ['A', 'B', 'C', 'D'];
+            const startColIdx = cols.indexOf(startCol);
+            const endColIdx = cols.indexOf(endCol);
+
+            for (let c = startColIdx; c <= endColIdx; c++) {
+                for (let r = startRow; r <= endRow; r++) {
+                    let cellKey = `${cols[c]}${r}`;
+                    let val = evaluateFormula(state.gridData[cellKey] || '0');
+                    let num = parseFloat(val);
+                    if (!isNaN(num)) values.push(num);
+                }
+            }
+            return values;
+        }
+
+        function renderQuizView(container) {
+            container.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="help-circle" class="w-6 h-6 text-excel-500"></i> MS Excel Ամփոփիչ Թեստ
+                        </h2>
+                        <p class="text-slate-600 dark:text-slate-300 text-sm mt-1">
+                            Ստուգեք ձեր գիտելիքները անցած դասերից:
+                        </p>
+                    </div>
+
+                    <form id="quiz-form" class="space-y-6">
+                        ${quizQuestions.map((q, idx) => `
+                            <div class="p-5 bg-slate-50 dark:bg-slate-700/40 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
+                                <h4 class="font-bold text-slate-800 dark:text-slate-100">${q.question}</h4>
+                                <div class="space-y-2">
+                                    ${q.options.map((opt, oIdx) => `
+                                        <label class="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-excel-500 transition">
+                                            <input type="radio" name="q_${idx}" value="${oIdx}" class="text-excel-500 focus:ring-excel-500">
+                                            <span class="text-sm text-slate-700 dark:text-slate-200">${opt}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+
+                        <button type="button" onclick="submitQuiz()" class="w-full py-3 bg-excel-500 hover:bg-excel-600 text-white font-bold rounded-xl shadow-md shadow-excel-500/20 transition flex items-center justify-center gap-2">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i> Ստուգել Արդյունքները
+                        </button>
+                    </form>
+
+                    <div id="quiz-results" class="hidden p-5 rounded-xl border text-center space-y-2"></div>
+                </div>
+            `;
+            initLucide();
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            quizQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="q_${idx}"]:checked`);
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score++;
+                }
+            });
+
+            const resDiv = document.getElementById('quiz-results');
+            resDiv.classList.remove('hidden', 'bg-emerald-50', 'bg-red-50', 'border-emerald-300', 'border-red-300');
+
+            if (score >= 3) {
+                resDiv.classList.add('bg-emerald-50', 'dark:bg-emerald-950/40', 'border-emerald-300', 'text-emerald-800', 'dark:text-emerald-300');
+                resDiv.innerHTML = `
+                    <h3 class="text-xl font-bold">Գերազանց է! 🎉</h3>
+                    <p class="text-sm">Դուք ճիշտ պատասխանեցիք ${score} / ${quizQuestions.length} հարցերին:</p>
+                `;
+            } else {
+                resDiv.classList.add('bg-red-50', 'dark:bg-red-950/40', 'border-red-300', 'text-red-800', 'dark:text-red-300');
+                resDiv.innerHTML = `
+                    <h3 class="text-xl font-bold">Փորձեք կրկին 💡</h3>
+                    <p class="text-sm">Դուք ճիշտ պատասխանեցիք ${score} / ${quizQuestions.length} հարցերին: Խորհուրդ ենք տալիս կրկնել դասերը:</p>
+                `;
+            }
+        }
+
+        function checkAnswer(btn, answer, correct) {
+            const parent = btn.parentElement.parentElement;
+            const feedback = parent.querySelector('.quiz-feedback');
+            feedback.classList.remove('hidden', 'text-emerald-600', 'text-red-500');
+
+            if (answer === correct) {
+                feedback.classList.add('text-emerald-600');
+                feedback.innerText = 'Ճիշտ է! 👏';
+            } else {
+                feedback.classList.add('text-red-500');
+                feedback.innerText = 'Սխալ է, փորձիր նորից:';
+            }
+        }
+
+        function toggleLessonComplete(lessonId) {
+            if (state.completedLessons.has(lessonId)) {
+                state.completedLessons.delete(lessonId);
+            } else {
+                state.completedLessons.add(lessonId);
+            }
+            localStorage.setItem('excel_completed_lessons', JSON.stringify([...state.completedLessons]));
+            updateProgressBar();
+            loadLesson(lessonId);
+        }
+
+        function updateProgressBar() {
+            let totalLessons = 0;
+            courseData.forEach(m => totalLessons += m.lessons.length);
+            const done = state.completedLessons.size;
+            const pct = Math.round((done / totalLessons) * 100);
+
+            document.getElementById('overall-progress-text').innerText = `${pct}%`;
+            document.getElementById('overall-progress-bar').style.width = `${pct}%`;
+        }
+
+        function navigateNext(currentId) {
+            let allLessons = [];
+            courseData.forEach(m => m.lessons.forEach(l => allLessons.push(l.id)));
+            const idx = allLessons.indexOf(currentId);
+            if (idx !== -1 && idx + 1 < allLessons.length) {
+                loadLesson(allLessons[idx + 1]);
+            }
+        }
+    </script>
+</body>
+</html>
